@@ -156,31 +156,48 @@ def infer_status(q):
 
 def infer_metric(q):
     ql = q.lower()
+
     if "refund rate" in ql or "percentage of orders refunded" in ql:
         return "refund_rate"
-    # Average order value phrasing, including qualifiers such as "paid".
-        # Average / mean / per-order value questions
+
+    # Customer counts must take priority over product/region mentions.
+    if (
+        re.search(r"\bhow many (different |unique |distinct )?customers\b", ql)
+        or re.search(r"\bnumber of (different |unique |distinct )?customers\b", ql)
+        or re.search(r"\b(count|counting) (the )?(different |unique |distinct )?customers\b", ql)
+        or "unique customer" in ql
+        or "distinct customer" in ql
+        or "customer count" in ql
+    ):
+        return "customers"
+
     if (
         re.search(r"\bon average\b", ql)
-        or re.search(r"\baverage\b", ql)
-        or re.search(r"\bavg\b", ql)
+        or "average order value" in ql
+        or "average value per order" in ql
+        or "avg order value" in ql
         or re.search(r"\bmean\b", ql)
         or re.search(r"\bper order\b", ql)
-        or re.search(r"\b(order|orders)\s+(worth|value)\b", ql)
+        or re.search(r"\borders?\s+(worth|value)\b", ql)
         or re.search(r"\bworth\s+is\b", ql)
     ):
         return "average"
-    if any(x in ql for x in ["unique customer", "distinct customer", "how many customers", "number of customers", "customer count"]):
-        return "customers"
+
     if any(x in ql for x in ["unit", "quantity", "quantities", "items sold", "pieces sold"]):
         return "units"
-    if any(x in ql for x in ["how many orders", "number of orders", "count of orders", "order count", "count orders", "orders were"]):
+
+    if (
+        any(x in ql for x in [
+            "how many orders", "number of orders", "count of orders",
+            "order count", "count orders", "orders were"
+        ])
+        or (re.search(r"\bcount\b", ql) and re.search(r"\borders?\b", ql))
+    ):
         return "orders"
-    # Handle natural count phrasing such as "Count the refunded South orders...".
-    if re.search(r"\bcount\b", ql) and re.search(r"\borders?\b", ql):
-        return "orders"
+
     if any(x in ql for x in ["which", "top", "highest", "most", "least", "best", "largest", "lowest", "fewest"]):
         return "rank"
+
     return "sum"
 
 def infer_group(q):
