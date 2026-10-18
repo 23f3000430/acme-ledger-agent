@@ -159,10 +159,15 @@ def infer_metric(q):
     if "refund rate" in ql or "percentage of orders refunded" in ql:
         return "refund_rate"
     # Average order value phrasing, including qualifiers such as "paid".
+        # Average / mean / per-order value questions
     if (
-        re.search(r"\b(average|avg|mean)\b.{0,45}\b(order|orders)\b.{0,25}\b(value|amount)\b", ql)
-        or re.search(r"\b(average|avg|mean)\b.{0,35}\b(value|amount)\b.{0,20}\b(per|of)\b.{0,15}\border\b", ql)
-        or any(x in ql for x in ["average value per order", "avg order value", "mean order value", "average order value"])
+        re.search(r"\bon average\b", ql)
+        or re.search(r"\baverage\b", ql)
+        or re.search(r"\bavg\b", ql)
+        or re.search(r"\bmean\b", ql)
+        or re.search(r"\bper order\b", ql)
+        or re.search(r"\b(order|orders)\s+(worth|value)\b", ql)
+        or re.search(r"\bworth\s+is\b", ql)
     ):
         return "average"
     if any(x in ql for x in ["unique customer", "distinct customer", "how many customers", "number of customers", "customer count"]):
