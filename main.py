@@ -149,7 +149,8 @@ def infer_status(q):
     ql = q.lower()
     if re.search(r"\b(refund|refunded|refunds|refunded amount)\b", ql):
         return "refunded"
-    if re.search(r"\b(revenue|sales|turnover|sold|spend|spent|earnings|income)\b", ql):
+    # Include common forms of "earn" (e.g. "How much did North earn?").
+    if re.search(r"\b(revenue|sales|turnover|sold|spend|spent|earn|earned|earns|earning|earnings|income)\b", ql):
         return "paid"
     return None
 
